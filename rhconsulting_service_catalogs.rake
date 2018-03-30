@@ -3,8 +3,10 @@ require_relative 'rhconsulting_options'
 
 class ServiceCatalogsImportExport
 
-  def import(filedir)
+  def import(filedir, options)
     raise "Must supply filedir" if filedir.blank?
+    service_templates_imported = []
+    service_catalogs_imported = []
     Dir.foreach(filedir) do |filename|
       next if filename == '.' or filename == '..'
       catalogs = YAML.load_file("#{filedir}/#{filename}")
@@ -12,7 +14,7 @@ class ServiceCatalogsImportExport
         data = []
         data << c.first[1].delete_if { |key,value| key == 'template' }
         ServiceTemplateCatalog.transaction do
-          import_service_template_catalogs(data)
+          service_catalogs_imported.concat import_service_template_catalogs(data)
         end
       }
       templates = YAML.load_file("#{filedir}/#{filename}")
@@ -21,10 +23,24 @@ class ServiceCatalogsImportExport
         data << c.first[1]['template']
         data.each { |template|
           ServiceTemplate.transaction do
-            import_service_templates(template)
+            service_templates_imported.concat import_service_templates(template)
           end
         }
       }
+    end
+    if options['exclusive'] == 'true'
+      ServiceTemplate.all.each do |template|
+        if service_templates_imported.exclude? template.name
+          puts "Hidding Template: #{template.name}"
+          ServiceTemplate.find_by_name("#{template.name}").update_attributes(:display => false)
+        end
+      end
+      ServiceTemplateCatalog.all.each do |catalog|
+        if service_catalogs_imported.exclude? catalog.name
+          puts "Hidding Catalog: #{catalog.name}"
+          ServiceTemplateCatalog.find_by_name("#{catalog.name}").update_attributes(:display => false)
+        end
+      end
     end
   end
 
@@ -53,6 +69,7 @@ class ServiceCatalogsImportExport
 private
 
   def import_service_template_catalogs(catalogs)
+    service_catalogs_imported = []
     catalogs.each do |c|
       if c['tenant_name'].nil?
         puts "Service Catalog: [#{c['name']}]"
@@ -68,11 +85,15 @@ private
       end
       catalog = ServiceTemplateCatalog.in_region(MiqRegion.my_region_number).find_or_create_by(name: c['name'])
       catalog.update_attributes!(c)
+      service_catalogs_imported << c['name']
     end
+    service_catalogs_imported
   end
 
   def import_service_templates(templates)
+    service_templates_imported = []
     templates.sort_by { |t| t['service_type'] == 'composite' ? 1 : 0 }.each do |t|
+      puts "Catalog Item: [#{t['name']}]"
       template = ServiceTemplate.in_region(MiqRegion.my_region_number).find_or_create_by(name: t['name'])
       if t['tenant_name'].nil?
         template.update_attributes!(t.slice(
@@ -106,7 +127,9 @@ private
 
       import_service_template_options(t['options'], template)
       template.save!
+      service_templates_imported << t['name']
     end
+    service_templates_imported
   end
 
   ##
@@ -232,7 +255,7 @@ private
       custom_button = parent.custom_buttons.find { |x| x.name == cb['name'] }
       custom_button = CustomButton.new(:applies_to => template) unless custom_button
 
-      custom_button.update_attributes!(cb) 
+      custom_button.update_attributes!(cb)
       parent.add_member(custom_button) if parent.respond_to?(:add_member)
     end
   end
@@ -260,7 +283,7 @@ private
       child_button = custom_button_set.custom_buttons.find { |x| x.name == name }
       child_button.id if child_button
     end.compact
-    set_data[:applies_to_class] = 'ServiceTemplate' 
+    set_data[:applies_to_class] = 'ServiceTemplate'
     set_data[:applies_to_id] = template.id
     custom_button_set.set_data = set_data
   end
@@ -352,7 +375,7 @@ private
         'action', 'ae_namespace', 'ae_class', 'ae_instance', 'ae_message', 'ae_attributes')
       attributes['dialog_label'] = resource_action.dialog.label if resource_action.dialog
       attributes
-    end 
+    end
   end
 
   def export_service_resources(service_resources)
@@ -364,7 +387,7 @@ private
       attributes['resource_name'] = service_resource.resource.name
       attributes['resource_guid'] = service_resource.resource.guid
       attributes
-    end.compact 
+    end.compact
   end
 
   def export_custom_buttons(custom_buttons)
@@ -408,6 +431,18 @@ namespace :rhconsulting do
     desc 'Import all dialogs from a YAML file'
     task :import, [:filedir] => [:environment] do |_, arguments|
       ServiceCatalogsImportExport.new.import(arguments[:filedir])
+    end
+
+    desc 'Import all dialogs from a YAML file'
+    task :import_with_options, [:filedir, :options] => [:environment] do |_, arguments|
+      puts arguments
+      options = {}
+      arguments['options'].split(';').each do |passed_option|
+        option, value = passed_option.split('=')
+        options.merge!({ option => value })
+      end
+      puts "EXCLUSIVE var is #{options['exclusive']}"
+      ServiceCatalogsImportExport.new.import(arguments[:filedir], options)
     end
 
     desc 'Exports all dialogs to a YAML file'

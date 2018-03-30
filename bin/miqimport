@@ -63,7 +63,7 @@ op_domain () {
   fi
 
   echo "DOMAIN_OPTIONS=${DOMAIN_OPTIONS}"
-  
+
   pushd /var/www/miq/vmdb
   bin/rake "rhconsulting:miq_ae_datastore:import_with_options[${DOMAIN_NAME},${IMPORT_DIR},${DOMAIN_OPTIONS}]"
   popd
@@ -90,10 +90,10 @@ op_widgets () {
 }
 
 op_alerts () {
-  assert_num_args $# 1  
+  assert_num_args $# 1
   IMPORT_FILE_OR_DIR=$(readlink -v -f "$1")
   assert_import_file_or_dir_exists "$IMPORT_FILE_OR_DIR"
-  
+
   pushd /var/www/miq/vmdb
   bin/rake "rhconsulting:miq_alerts:import[${IMPORT_FILE_OR_DIR}]"
   popd
@@ -175,7 +175,9 @@ op_service_catalogs () {
   assert_import_dir_exists "$IMPORT_DIR"
 
   pushd /var/www/miq/vmdb
-  bin/rake "rhconsulting:service_catalogs:import[${IMPORT_DIR}]"
+  SERVICE_OPTIONS=""
+  SERVICE_OPTIONS="${SERVICE_OPTIONS}exclusive=${EXCLUSIVE};"
+  bin/rake "rhconsulting:service_catalogs:import_with_options[${IMPORT_DIR},${SERVICE_OPTIONS}]"
   popd
 }
 
@@ -265,7 +267,7 @@ op_all () {
       echo "Skipping $dir"
     fi
   done
-  
+
 }
 
 contains () {
@@ -279,7 +281,7 @@ contains () {
     fi
   done
 
-  return 1  
+  return 1
 }
 
 parse_arguments () {
@@ -289,6 +291,7 @@ parse_arguments () {
   ENABLED="true"
   TENANT_NAME=""
   TENANT_ID=""
+  EXCLUSIVE="false"
 
   # http://stackoverflow.com/questions/402377/using-getopts-in-bash-shell-script-to-get-long-and-short-command-line-options
   # http://stackoverflow.com/questions/14786984/best-way-to-parse-cmdline-args-bash
@@ -311,6 +314,10 @@ parse_arguments () {
       --disabled)
         ENABLED="false"
         shift # past the argument
+        ;;
+      --exclusive)
+        EXCLUSIVE="true"
+        shift # past the argument=value
         ;;
       --tenant-name)
         TENANT_NAME="$2"
@@ -425,6 +432,8 @@ Options:
                                    imported.
                                    Only used for "domain" object type.
                                    (Default = "")
+
+  --exclusive                      TDB
 
 Report bugs and feature requests to
 https://github.com/rhtconsulting/cfme-rhconsulting-scripts
