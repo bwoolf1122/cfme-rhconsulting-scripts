@@ -175,8 +175,7 @@ op_service_catalogs () {
   assert_import_dir_exists "$IMPORT_DIR"
 
   pushd /var/www/miq/vmdb
-  SERVICE_OPTIONS=""
-  SERVICE_OPTIONS="${SERVICE_OPTIONS}exclusive=${EXCLUSIVE};"
+  SERVICE_OPTIONS="exclusive=${EXCLUSIVE};catalog_delete=${CATALOG_DELETE}"
   bin/rake "rhconsulting:service_catalogs:import_with_options[${IMPORT_DIR},${SERVICE_OPTIONS}]"
   popd
 }
@@ -292,6 +291,7 @@ parse_arguments () {
   TENANT_NAME=""
   TENANT_ID=""
   EXCLUSIVE="false"
+  CATALOG_DELETE="false"
 
   # http://stackoverflow.com/questions/402377/using-getopts-in-bash-shell-script-to-get-long-and-short-command-line-options
   # http://stackoverflow.com/questions/14786984/best-way-to-parse-cmdline-args-bash
@@ -317,6 +317,10 @@ parse_arguments () {
         ;;
       --exclusive)
         EXCLUSIVE="true"
+        shift # past the argument=value
+        ;;
+      --delete)
+        CATALOG_DELETE="true"
         shift # past the argument=value
         ;;
       --tenant-name)
@@ -433,7 +437,9 @@ Options:
                                    Only used for "domain" object type.
                                    (Default = "")
 
-  --exclusive                      TDB
+  --exclusive                      TBD
+
+  --delete                         TBD
 
 Report bugs and feature requests to
 https://github.com/rhtconsulting/cfme-rhconsulting-scripts

@@ -28,17 +28,24 @@ class ServiceCatalogsImportExport
         }
       }
     end
-    if options['exclusive'] == 'true'
+    if options['exclusive'] == 'true' || options['service_delete'] == 'true'
       ServiceTemplate.all.each do |template|
         if service_templates_imported.exclude? template.name
-          puts "Hidding Template: #{template.name}"
-          ServiceTemplate.find_by_name("#{template.name}").update_attributes(:display => false)
+          if options['service_delete'] == 'true'
+            puts "Deleting Template: #{template.name}"
+            ServiceTemplate.find_by_name("#{template.name}").delete
+          elsif options['exclusive'] == 'true'
+            puts "Hidding Template: #{template.name}"
+            ServiceTemplate.find_by_name("#{template.name}").update_attributes(:display => false)
+          end
         end
       end
       ServiceTemplateCatalog.all.each do |catalog|
         if service_catalogs_imported.exclude? catalog.name
-          puts "Hidding Catalog: #{catalog.name}"
-          ServiceTemplateCatalog.find_by_name("#{catalog.name}").update_attributes(:display => false)
+          if options['service_delete'] == 'true'
+            puts "Deleting Catalog: #{catalog.name}"
+            ServiceTemplateCatalog.find_by_name("#{catalog.name}").delete
+          end
         end
       end
     end
@@ -289,13 +296,13 @@ private
   end
 
   def export_service_template_catalogs(catalogs)
-    catalogs.collect { |catalog| 
+    catalogs.collect { |catalog|
       attributes = catalog.attributes.slice('name', 'description', 'tenant_id')
       tenant_name = Tenant.find_by_id(attributes['tenant_id']).name
       attributes.delete('tenant_id')
       attributes.merge!({"tenant_name" => tenant_name})
       attributes
-    } 
+    }
   end
 
   def export_service_template_options(options)
@@ -442,6 +449,7 @@ namespace :rhconsulting do
         options.merge!({ option => value })
       end
       puts "EXCLUSIVE var is #{options['exclusive']}"
+      puts "SERVICE_DELETE var is #{options['service_delete']}"
       ServiceCatalogsImportExport.new.import(arguments[:filedir], options)
     end
 
