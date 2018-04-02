@@ -16,8 +16,8 @@ class ServiceDialogImportExport
     }
   end
 
-  def import(filedir, options)
-    service_dialogs_imported = []
+  def import(filedir)
+    #service_dialogs_imported = []
     raise "Must supply filedir" if filedir.blank?
     if File.file?(filedir)
       Dialog.transaction do
@@ -27,20 +27,21 @@ class ServiceDialogImportExport
       Dialog.transaction do
         Dir.foreach(filedir) do |filename|
           next if filename == '.' or filename == '..'
-          service_dialogs_imported.concat import_dialogs_from_file("#{filedir}/#{filename}")
+          #service_dialogs_imported.concat
+          import_dialogs_from_file("#{filedir}/#{filename}")
         end
       end
     end
 
-    supplied_dialogs = ['Transform VM', 'azure-single-vm-from-user-image']
-    if options['exclusive'] == 'true'
-      Dialog.all.each do |dialog|
-        if supplied_dialogs.exclude? dialog.label and service_dialogs_imported.exclude? template.label
-            puts "Renaming [#{dialog.label}] to [OLD - #{dialog.label}"
-            dialog.update_attributes(:label => "OLD - #{dialog.label}")
-        end
-      end
-    end
+    #supplied_dialogs = ['Transform VM', 'azure-single-vm-from-user-image']
+    #if options['exclusive'] == 'true'
+    #  Dialog.all.each do |dialog|
+    #    if supplied_dialogs.exclude? dialog.label and service_dialogs_imported.exclude? template.label
+    #        puts "Renaming [#{dialog.label}] to [OLD - #{dialog.label}"
+    #        dialog.update_attributes(:label => "OLD - #{dialog.label}")
+    #    end
+    #  end
+    #end
   end
 
   private
@@ -211,12 +212,12 @@ namespace :rhconsulting do
 
     desc 'Import all service dialogs to individual YAML files'
     task :import_with_options, [:filedir] => [:environment] do |_, arguments|
-      options = {}
-      arguments['options'].split(';').each do |passed_option|
-        option, value = passed_option.split('=')
-        options.merge!({ option => value })
-      end
-      ServiceDialogImportExport.new.import(arguments[:filedir], options)
+      #options = {}
+      #arguments['options'].split(';').each do |passed_option|
+      #  option, value = passed_option.split('=')
+      #  options.merge!({ option => value })
+      #end
+      ServiceDialogImportExport.new.import(arguments[:filedir])
     end
 
     desc 'Exports all service dialogs to individual YAML files'
