@@ -145,8 +145,7 @@ op_provision_dialogs () {
   assert_import_file_or_dir_exists "$IMPORT_FILE_OR_DIR"
 
   pushd /var/www/miq/vmdb
-  SERVICE_OPTIONS="exclusive=${EXCLUSIVE}"
-  bin/rake "rhconsulting:provision_dialogs:import[${IMPORT_FILE_OR_DIR},${SERVICE_OPTIONS}]"
+  bin/rake "rhconsulting:provision_dialogs:import[${IMPORT_FILE_OR_DIR}]"
   popd
 }
 
@@ -166,7 +165,8 @@ op_service_dialogs () {
   assert_import_file_or_dir_exists "$IMPORT_FILE_OR_DIR"
 
   pushd /var/www/miq/vmdb
-  bin/rake "rhconsulting:service_dialogs:import_with_options[${IMPORT_FILE_OR_DIR}]"
+  SERVICE_OPTIONS="exclusive=${EXCLUSIVE}"
+  bin/rake "rhconsulting:service_dialogs:import_with_options[${IMPORT_FILE_OR_DIR}, ${SERVICE_OPTIONS}]"
   popd
 }
 
