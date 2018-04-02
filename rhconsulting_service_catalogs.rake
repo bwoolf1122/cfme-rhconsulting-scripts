@@ -28,10 +28,10 @@ class ServiceCatalogsImportExport
         }
       }
     end
-    if options['exclusive'] == 'true' || options['service_delete'] == 'true'
+    if options['exclusive'] == 'true' || options['catalog_delete'] == 'true'
       ServiceTemplate.all.each do |template|
         if service_templates_imported.exclude? template.name
-          if options['service_delete'] == 'true'
+          if options['catalog_delete'] == 'true'
             puts "Deleting Template: #{template.name}"
             ServiceTemplate.find_by_name("#{template.name}").delete
           elsif options['exclusive'] == 'true'
@@ -42,7 +42,7 @@ class ServiceCatalogsImportExport
       end
       ServiceTemplateCatalog.all.each do |catalog|
         if service_catalogs_imported.exclude? catalog.name
-          if options['service_delete'] == 'true'
+          if options['catalog_delete'] == 'true'
             puts "Deleting Catalog: #{catalog.name}"
             ServiceTemplateCatalog.find_by_name("#{catalog.name}").delete
           end
@@ -356,8 +356,6 @@ namespace :rhconsulting do
         option, value = passed_option.split('=')
         options.merge!({ option => value })
       end
-      puts "EXCLUSIVE var is #{options['exclusive']}"
-      puts "SERVICE_DELETE var is #{options['service_delete']}"
       ServiceCatalogsImportExport.new.import(arguments[:filedir], options)
     end
 
