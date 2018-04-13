@@ -83,15 +83,15 @@ class ButtonsImportExport
     resource_action = ResourceAction.new
     all_ra = ResourceAction.in_region(MiqRegion.my_region_number)
     all_ra.each do |find_action|
-      #  puts "checking ra: #{find_action['id']} if it has resource_id of #{find_action['resource_id']}"
+      puts "checking ra: #{find_action['id']} if it has resource_id of #{find_action['resource_id']}"
       if find_action['resource_id'] == custom_button.id
-        #    puts "FOUND: #{find_action.inspect}"
+        puts "FOUND: #{find_action.inspect}"
         resource_action = find_action
         resource_action.reload
       end
     end
 
-    #puts "ResourceActions PRE: #{resource_action.inspect}"
+    puts "ResourceActions PRE: #{resource_action.inspect}"
     ra = {}
     ra['action'] = resource_actions['action']
     ra['resource_id'] = custom_button.id
@@ -102,17 +102,17 @@ class ButtonsImportExport
     ra['ae_message'] = resource_actions['ae_message']
     ra['ae_attributes'] = resource_actions['ae_attributes']
     dialog_label = resource_actions['dialog_label']
-    #puts "dialog_label: #{dialog_label.inspect}"
+    puts "dialog_label: #{dialog_label.inspect}"
     unless dialog_label.nil?
       dialog = Dialog.in_region(MiqRegion.my_region_number).find_by_label(dialog_label)
-      #puts "dialog: #{dialog.inspect}"
+      puts "dialog: #{dialog.inspect}"
       raise "Unable to locate dialog: [#{dialog_label}]" unless dialog
       ra['dialog_id'] = dialog.id
     end
     resource_action.update_attributes!(ra)
     resource_action.reload
     resource_action.save!
-    #puts "ResourceActions POST: #{resource_action.inspect}"
+    puts "ResourceActions POST: #{resource_action.inspect}"
   end
 
   def import_custom_buttons(custom_buttons, cbs, parent)

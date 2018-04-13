@@ -33,10 +33,10 @@ class ServiceCatalogsImportExport
         if service_templates_imported.exclude? template.name
           if options['catalog_delete'] == 'true'
             puts "Deleting Template: #{template.name}"
-            ServiceTemplate.find_by_name("#{template.name}").delete
+            template.delete
           elsif options['exclusive'] == 'true'
             puts "Hidding Template: #{template.name}"
-            ServiceTemplate.find_by_name("#{template.name}").update_attributes(:display => false)
+            template.update_attributes(:display => false)
           end
         end
       end
@@ -167,15 +167,24 @@ private
   end
 
   def import_resource_actions(resource_actions, template)
+    puts "in import resource action"
     resource_actions.each do |ra|
       resource_action = template.resource_actions.find_by_action(ra['action'])
+      puts "resource_action find by action: #{resource_action}"
+      p resource_action
       resource_action = template.resource_actions.new unless resource_action
+      puts "resource_action after new: #{resource_action}"
 
       dialog_label = ra.delete('dialog_label')
+      puts "dialog label: #{dialog_label}"
       unless dialog_label.blank?
+        puts "in setting dialog"
         dialog = Dialog.in_region(MiqRegion.my_region_number).find_by_label(dialog_label)
+        puts "dialog: #{dialog}"
+        p dialog
         raise "Unable to locate dialog: [#{dialog_label}]" unless dialog
         ra['dialog_id'] = dialog.id
+        puts "Dialog ID: #{dialog.id}"
       end
 
       resource_action.update_attributes!(ra)
@@ -350,7 +359,6 @@ namespace :rhconsulting do
 
     desc 'Import all dialogs from a YAML file'
     task :import_with_options, [:filedir, :options] => [:environment] do |_, arguments|
-      puts arguments
       options = {}
       arguments['options'].split(';').each do |passed_option|
         option, value = passed_option.split('=')
