@@ -51,6 +51,19 @@ private
     begin
       groups.each do |r|
         group = MiqGroup.find_or_create_by(description: r['description'])
+        tenant_name = r.delete('tenant_name')
+        tenant = Tenant.find_by(name:tenant_name)
+        if tenant.nil?
+          tenant_id = Tenant.first.id
+        else
+          tenant_id = tenant.id
+        end
+        group.tenant_id = tenant_id
+
+        miq_user_role_name = r.delete('miq_user_role_name')
+        group.miq_user_role = MiqUserRole.find_by(name:miq_user_role_name)
+
+        group.save!
         group.update_attributes!(r)
       end
     rescue
