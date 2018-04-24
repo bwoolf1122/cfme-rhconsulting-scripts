@@ -94,6 +94,15 @@ import()
     echo "Skipping ${src} file as it does not exist."
   fi
 
+  src="${DIR}/groups/groups.yml"
+  if [ -f "${src}" ]; then
+    echo "Importing ${src} file..."
+    bin/rake rhconsulting:groups:import[${src}]
+  else
+    echo "Skipping ${src} file as it does not exist."
+  fi
+
+
   src="${DIR}/tags/tags.yml"
   if [ -f "${src}" ]; then
     echo "Importing ${src} file..."
