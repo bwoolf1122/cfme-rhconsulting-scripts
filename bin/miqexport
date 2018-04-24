@@ -43,7 +43,7 @@ op_all () {
   echo "Exporting everything to [$EXPORT_DIR]"
 
   mkdir_if_needed $EXPORT_DIR
-  
+
   pushd $EXPORT_DIR
 
   mkdir_if_needed "provision_dialogs"
@@ -51,12 +51,15 @@ op_all () {
 
   mkdir_if_needed "service_dialogs"
   op_service_dialogs service_dialogs &
-  
+
   mkdir_if_needed "service_catalogs"
   op_service_catalogs service_catalogs &
 
   mkdir_if_needed "roles"
   op_roles roles &
+
+  mkdir_if_needed "groups"
+  op_groups groups &
 
   mkdir_if_needed "tags"
   op_tags tags &
@@ -108,7 +111,7 @@ op_all () {
 
   popd
 
-  for job in `jobs -p` 
+  for job in `jobs -p`
   do
     echo "waiting on background job: [$job]"
     wait $job
@@ -120,7 +123,7 @@ op_domain () {
   DOMAIN_NAME=$1
   EXPORT_DIR=$(readlink -v -f "$2")
   assert_export_dir_exists "$EXPORT_DIR"
-  
+
   pushd /var/www/miq/vmdb
   bin/rake "rhconsulting:miq_ae_datastore:export[${DOMAIN_NAME},${EXPORT_DIR}]"
   popd
@@ -130,7 +133,7 @@ op_reports () {
   assert_num_args $# 1
   EXPORT_DIR=$(readlink -v -f "$1")
   assert_export_dir_exists "$EXPORT_DIR"
-  
+
   pushd /var/www/miq/vmdb
   bin/rake "rhconsulting:miq_reports:export[${EXPORT_DIR},keep_spaces=${KEEP_SPACES}]"
   popd
@@ -140,7 +143,7 @@ op_widgets () {
   assert_num_args $# 1
   EXPORT_DIR=$(readlink -v -f "$1")
   assert_export_dir_exists "$EXPORT_DIR"
-  
+
   pushd /var/www/miq/vmdb
   bin/rake "rhconsulting:miq_widgets:export[${EXPORT_DIR},keep_spaces=${KEEP_SPACES}]"
   popd
@@ -150,7 +153,7 @@ op_alerts () {
   assert_num_args $# 1
   EXPORT_DIR=$(readlink -v -f "$1")
   assert_export_dir_exists "$EXPORT_DIR"
-  
+
   pushd /var/www/miq/vmdb
   bin/rake "rhconsulting:miq_alerts:export[${EXPORT_DIR},keep_spaces=${KEEP_SPACES}]"
   popd
@@ -257,6 +260,17 @@ op_roles () {
   popd
 }
 
+op_groups () {
+  assert_num_args $# 1
+  EXPORT_FILE=$(readlink -v -f "$1")
+  EXPORT_DIR=$(dirname "$EXPORT_FILE")
+  assert_export_dir_exists "$EXPORT_DIR"
+
+  pushd /var/www/miq/vmdb
+  bin/rake "rhconsulting:groups:export[${EXPORT_FILE},keep_spaces=${KEEP_SPACES}]"
+  popd
+}
+
 op_tags () {
   assert_num_args $# 1
   EXPORT_FILE=$(readlink -v -f "$1")
@@ -301,7 +315,7 @@ contains () {
     fi
   done
 
-  return 1  
+  return 1
 }
 
 parse_arguments () {
