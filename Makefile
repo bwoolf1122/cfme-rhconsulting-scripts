@@ -11,6 +11,7 @@ rm-installed-files:
 	rm -f /var/www/miq/vmdb/lib/tasks/rhconsulting_service_dialogs.rake
 	rm -f /var/www/miq/vmdb/lib/tasks/rhconsulting_miq_ae_datastore.rake
 	rm -f /var/www/miq/vmdb/lib/tasks/rhconsulting_roles.rake
+	rm -f /var/www/miq/vmdb/lib/tasks/rhconsulting_groups.rake
 	rm -f /var/www/miq/vmdb/lib/tasks/rhconsulting_service_catalogs.rake
 	rm -f /var/www/miq/vmdb/lib/tasks/rhconsulting_tags.rake
 	rm -f /var/www/miq/vmdb/lib/tasks/rhconsulting_reports.rake
@@ -33,6 +34,7 @@ install:
 	install -Dm644 rhconsulting_service_dialogs.rake /var/www/miq/vmdb/lib/tasks/rhconsulting_service_dialogs.rake
 	install -Dm644 rhconsulting_miq_ae_datastore.rake /var/www/miq/vmdb/lib/tasks/rhconsulting_miq_ae_datastore.rake
 	install -Dm644 rhconsulting_roles.rake /var/www/miq/vmdb/lib/tasks/rhconsulting_roles.rake
+	install -Dm644 rhconsulting_groups.rake /var/www/miq/vmdb/lib/tasks/rhconsulting_groups.rake
 	install -Dm644 rhconsulting_service_catalogs.rake /var/www/miq/vmdb/lib/tasks/rhconsulting_service_catalogs.rake
 	install -Dm644 rhconsulting_tags.rake /var/www/miq/vmdb/lib/tasks/rhconsulting_tags.rake
 	install -Dm644 rhconsulting_reports.rake /var/www/miq/vmdb/lib/tasks/rhconsulting_reports.rake
