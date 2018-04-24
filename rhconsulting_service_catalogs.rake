@@ -101,13 +101,11 @@ private
     service_templates_imported = []
     templates.sort_by { |t| t['service_type'] == 'composite' ? 1 : 0 }.each do |t|
       service_templates_imported << t['name']
-      puts "Catalog Item: [#{t['name']}]"
       template = ServiceTemplate.in_region(MiqRegion.my_region_number).find_or_create_by(name: t['name'])
       if t['tenant_name'].nil?
         template.update_attributes!(t.slice(
         'description', 'type', 'display', 'service_type',
         'prov_type', 'provision_cost', 'long_description'))
-        puts "Catalog Item: [#{t['name']}]"
       else
         tenant = Tenant.find_by_name(t['tenant_name'])
         if tenant.nil?
@@ -168,24 +166,15 @@ private
   end
 
   def import_resource_actions(resource_actions, template)
-    puts "in import resource action"
     resource_actions.each do |ra|
       resource_action = template.resource_actions.find_by_action(ra['action'])
-      puts "resource_action find by action: #{resource_action}"
-      p resource_action
       resource_action = template.resource_actions.new unless resource_action
-      puts "resource_action after new: #{resource_action}"
 
       dialog_label = ra.delete('dialog_label')
-      puts "dialog label: #{dialog_label}"
       unless dialog_label.blank?
-        puts "in setting dialog"
         dialog = Dialog.in_region(MiqRegion.my_region_number).find_by_label(dialog_label)
-        puts "dialog: #{dialog}"
-        p dialog
         raise "Unable to locate dialog: [#{dialog_label}]" unless dialog
         ra['dialog_id'] = dialog.id
-        puts "Dialog ID: #{dialog.id}"
       end
 
       resource_action.update_attributes!(ra)
@@ -365,7 +354,6 @@ namespace :rhconsulting do
         option, value = passed_option.split('=')
         options.merge!({ option => value })
       end
-      puts "EXCLUSIVE var is #{options['exclusive']}"
       ServiceCatalogsImportExport.new.import(arguments[:filedir], options)
     end
 
