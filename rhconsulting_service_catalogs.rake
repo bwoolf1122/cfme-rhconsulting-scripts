@@ -100,6 +100,7 @@ private
   def import_service_templates(templates)
     service_templates_imported = []
     templates.sort_by { |t| t['service_type'] == 'composite' ? 1 : 0 }.each do |t|
+      service_templates_imported << t['name']
       puts "Catalog Item: [#{t['name']}]"
       template = ServiceTemplate.in_region(MiqRegion.my_region_number).find_or_create_by(name: t['name'])
       if t['tenant_name'].nil?
@@ -456,6 +457,7 @@ namespace :rhconsulting do
         option, value = passed_option.split('=')
         options.merge!({ option => value })
       end
+      puts "EXCLUSIVE var is #{options['exclusive']}"
       ServiceCatalogsImportExport.new.import(arguments[:filedir], options)
     end
 
