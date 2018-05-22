@@ -155,7 +155,8 @@ op_service_dialogs () {
   assert_import_file_or_dir_exists "$IMPORT_FILE_OR_DIR"
 
   pushd /var/www/miq/vmdb
-  bin/rake "rhconsulting:service_dialogs:import[${IMPORT_FILE_OR_DIR}]"
+  SERVICE_OPTIONS="exclusive=${EXCLUSIVE}"
+  bin/rake "rhconsulting:service_dialogs:import[${IMPORT_FILE_OR_DIR}, ${SERVICE_OPTIONS}]"
   popd
 }
 
@@ -177,6 +178,16 @@ op_roles () {
 
   pushd /var/www/miq/vmdb
   bin/rake "rhconsulting:roles:import[${IMPORT_FILE_OR_DIR}]"
+  popd
+}
+
+op_groups () {
+  assert_num_args $# 1
+  IMPORT_FILE_OR_DIR=$(readlink -v -f "$1")
+  assert_import_file_or_dir_exists "$IMPORT_FILE_OR_DIR"
+
+  pushd /var/www/miq/vmdb
+  bin/rake "rhconsulting:groups:import[${IMPORT_FILE_OR_DIR}]"
   popd
 }
 

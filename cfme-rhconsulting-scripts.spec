@@ -36,6 +36,7 @@ install --backup --mode=0755 -t "%{buildroot}/usr/bin" bin/import-miqdomain
 /var/www/miq/vmdb/lib/tasks/rhconsulting_customization_templates.rake
 /var/www/miq/vmdb/lib/tasks/rhconsulting_orchestration_templates.rake
 /var/www/miq/vmdb/lib/tasks/rhconsulting_roles.rake
+/var/www/miq/vmdb/lib/tasks/rhconsulting_groups.rake
 /var/www/miq/vmdb/lib/tasks/rhconsulting_provision_dialogs.rake
 /var/www/miq/vmdb/lib/tasks/rhconsulting_service_dialogs.rake
 /var/www/miq/vmdb/lib/tasks/rhconsulting_service_catalogs.rake

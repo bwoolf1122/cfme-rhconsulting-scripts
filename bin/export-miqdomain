@@ -43,6 +43,7 @@ export ()
   bin/rake rhconsulting:service_dialogs:export["${BUILDDIR}/service_dialogs"]
   bin/rake rhconsulting:service_catalogs:export["${BUILDDIR}/service_catalogs"]
   bin/rake rhconsulting:roles:export["${BUILDDIR}/roles/roles.yml"]
+  bin/rake rhconsulting:roles:export["${BUILDDIR}/groups/groups.yml"]
   bin/rake rhconsulting:tags:export["${BUILDDIR}/tags/tags.yml"]
   bin/rake rhconsulting:buttons:export["${BUILDDIR}/buttons/buttons.yml"]
   bin/rake rhconsulting:miq_reports:export["${BUILDDIR}/reports"]

@@ -83,9 +83,9 @@ class ButtonsImportExport
     resource_action = ResourceAction.new
     all_ra = ResourceAction.in_region(MiqRegion.my_region_number)
     all_ra.each do |find_action|
-      #  puts "checking ra: #{find_action['id']} if it has resource_id of #{find_action['resource_id']}"
+      #puts "checking ra: #{find_action['id']} if it has resource_id of #{find_action['resource_id']}"
       if find_action['resource_id'] == custom_button.id
-        #    puts "FOUND: #{find_action.inspect}"
+        #puts "FOUND: #{find_action.inspect}"
         resource_action = find_action
         resource_action.reload
       end
@@ -143,7 +143,7 @@ class ButtonsImportExport
           custom_button['name'] = cb['name']
           custom_button['description'] = cb['description']
           custom_button['applies_to_class'] = cb['applies_to_class']
-          custom_button['applies_to_exp'] = cb['applies_to_exp']
+          custom_button['applies_to_exp'] = cb['applies_to_exp'] if CustomButton.attribute_names.include?('applies_to_exp')
           custom_button['options'] = cb['options']
           custom_button['userid'] = cb['userid']
           custom_button['wait_for_complete'] = cb['wait_for_complete']

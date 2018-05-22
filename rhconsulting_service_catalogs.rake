@@ -106,7 +106,6 @@ private
         template.update_attributes!(t.slice(
         'description', 'type', 'display', 'service_type',
         'prov_type', 'provision_cost', 'long_description'))
-        puts "Catalog Item: [#{t['name']}]"
       else
         tenant = Tenant.find_by_name(t['tenant_name'])
         if tenant.nil?
@@ -203,6 +202,7 @@ private
   def import_custom_buttons(custom_buttons, template, parent)
     custom_buttons.each do |cb|
       puts "Button: [#{cb['name']}]"
+      cb.delete('applies_to_exp') unless CustomButton.attribute_names.include?('applies_to_exp')
       custom_button = parent.custom_buttons.find { |x| x.name == cb['name'] }
       custom_button = CustomButton.new(:applies_to => template) unless custom_button
 
