@@ -105,8 +105,12 @@ class ButtonsImportExport
       ra['dialog_id'] = dialog.id
     end
     resource_action.update_attributes!(ra)
+    puts "\t\tRA Before Save..."
+    p resource_action
     resource_action.reload
     resource_action.save!
+    puts "\t\tRA After Save..."
+    p resource_action
     resource_action.update_attributes(dialog: nil) if dialog_label.nil?
   end
 
