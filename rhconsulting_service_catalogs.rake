@@ -125,7 +125,7 @@ private
         raise "Unable to locate catalog: [#{t['service_template_catalog_name']}]" unless template.service_template_catalog
       end
       template.save!
-
+      puts "After first save: #{template.resource_actions.count}"
       import_resource_actions(t['resource_actions'], template)
       import_service_resources(t['service_resources'] || [], template)
       import_custom_buttons(t['custom_buttons'], template, template)
@@ -133,6 +133,7 @@ private
 
       import_service_template_options(t['options'], template)
       template.save!
+      puts "After second save: #{template.resource_actions.count}"
       service_templates_imported << t['name']
     end
     service_templates_imported
@@ -176,11 +177,7 @@ private
         raise "Unable to locate dialog: [#{dialog_label}]" unless dialog
         ra['dialog_id'] = dialog.id
       end
-      puts "Before update(ra): #{ra.inspect}"
-      puts "Before update(resource_action): #{resource_action.inspect}"
       resource_action.update_attributes!(ra)
-      puts "After update(ra): #{ra.inspect}"
-      puts "After update(resource_action): #{resource_action.inspect}"
     end
   end
 
