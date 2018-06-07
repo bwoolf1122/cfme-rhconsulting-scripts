@@ -176,8 +176,11 @@ private
         raise "Unable to locate dialog: [#{dialog_label}]" unless dialog
         ra['dialog_id'] = dialog.id
       end
-
+      puts "Before update(ra): #{ra.inspect}"
+      puts "Before update(resource_action): #{resource_action.inspect}"
       resource_action.update_attributes!(ra)
+      puts "After update(ra): #{ra.inspect}"
+      puts "After update(resource_action): #{resource_action.inspect}"
     end
   end
 
