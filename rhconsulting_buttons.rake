@@ -163,7 +163,7 @@ class ButtonsImportExport
       custom_buttons.collect do |custom_button|
         button = custom_button.attributes.slice(
             'description', 'applies_to_class', 'applies_to_exp', 'options', 'userid',
-            'wait_for_complete', 'name', 'visibility', 'visibility_expression' 'applies_to_id')
+            'wait_for_complete', 'name', 'visibility', 'visibility_expression', 'applies_to_id')
         button['resource_actions'] = export_resource_actions(custom_button.resource_action)
         buttons << button
       end
