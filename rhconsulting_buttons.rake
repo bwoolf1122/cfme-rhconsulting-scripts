@@ -115,6 +115,7 @@ class ButtonsImportExport
         custom_button['userid'] = cb['userid']
         custom_button['wait_for_complete'] = cb['wait_for_complete']
         custom_button['visibility'] = cb['visibility']
+        custom_button['visibility_expression'] = cb['visibility_expression']
         custom_button['applies_to_id'] = cb['applies_to_id']
         custom_button.update_attributes!(cb)
         custom_button.save!
@@ -162,7 +163,7 @@ class ButtonsImportExport
       custom_buttons.collect do |custom_button|
         button = custom_button.attributes.slice(
             'description', 'applies_to_class', 'applies_to_exp', 'options', 'userid',
-            'wait_for_complete', 'name', 'visibility', 'applies_to_id')
+            'wait_for_complete', 'name', 'visibility', 'visibility_expression', 'applies_to_id')
         button['resource_actions'] = export_resource_actions(custom_button.resource_action)
         buttons << button
       end
