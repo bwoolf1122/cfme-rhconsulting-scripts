@@ -129,6 +129,16 @@ op_scanitems () {
   popd
 }
 
+op_scriptsrc () {
+  assert_num_args $# 1
+  IMPORT_DIR=$(readlink -v -f "$1")
+  assert_import_dir_exists "$IMPORT_DIR"
+
+  pushd /var/www/miq/vmdb
+  bin/rake "rhconsulting:miq_scriptsrc:import[${IMPORT_DIR}]"
+  popd
+}
+
 op_provision_dialogs () {
   assert_num_args $# 1
   IMPORT_FILE_OR_DIR=$(readlink -v -f "$1")
@@ -274,7 +284,6 @@ contains () {
   return 1
 }
 
-
 parse_arguments () {
   # initialize non-required arguments before the loop in case they are
   # not present in the command line
@@ -393,6 +402,8 @@ Available Object Types:
   widgets                          Import custom widgets.
   policies                         Import policies.
   scanitems                        Import scanitems.
+  scriptsrc                        Import config script sources.
+  schedules                        Import schedules (non-widget type only).
   domain <name>                    Import the specified domain from the
                                    <importsource> directory. <name> MUST
                                    be specified.

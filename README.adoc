@@ -74,6 +74,8 @@ Available Object Types:
   alertsets                        Export alert sets.
   policies                         Export policies.
   scanitems                        Export scan items.
+  scriptsrc                        Export config script sources.
+  schedules                        Export schedules (non-widget type only).
   domain <name>                    Export the specified domain from the
                                    Automate Engine Datastore. <name> MUST
                                    be specified.
@@ -123,6 +125,8 @@ Available Object Types:
   alertsets                        Import alert sets.
   policies                         Import policies.
   scanitems                        Import scan items.
+  scriptsrc                        Import config script sources
+  schedules                        Import schedules (non-widget type only).
   domain <name>                    Import the specified domain from the
                                    <importsource> directory. <name> MUST
                                    be specified.
@@ -156,9 +160,10 @@ BUILDDIR=/tmp/CFME-build
 DOMAIN_EXPORT=YourDomainHere
 
 rm -fR ${BUILDDIR}
-mkdir -p ${BUILDDIR}/{service_catalogs,dialogs,roles,tags,buttons,customization_templates,policies,alerts,alertsets,widgets,miq_ae_datastore,scanitems}
+mkdir -p ${BUILDDIR}/{service_catalogs,dialogs,roles,tags,buttons,customization_templates,policies,alerts,alertsets,widgets,miq_ae_datastore,scanitems,scriptsrc}
 
 cd /var/www/miq/vmdb
+bin/rake rhconsulting:miq_schedules:export[${BUILDDIR}/schedules]
 bin/rake rhconsulting:provision_dialogs:export[${BUILDDIR}/provision_dialogs]
 bin/rake rhconsulting:service_dialogs:export[${BUILDDIR}/service_dialogs]
 bin/rake rhconsulting:service_catalogs:export[${BUILDDIR}/service_catalogs]
@@ -172,6 +177,7 @@ bin/rake rhconsulting:miq_alerts:export[${BUILDDIR}/alerts]
 bin/rake rhconsulting:miq_alertsets:export[${BUILDDIR}/alertsets]
 bin/rake rhconsulting:miq_widgets:export[${BUILDDIR}/widgets]
 bin/rake rhconsulting:miq_scanprofiles:export[${BUILDDIR}/scanitems]
+bin/rake rhconsulting:miq_scriptsrc:export[${BUILDDIR}/scriptsrc]
 bin/rake "rhconsulting:miq_ae_datastore:export[${DOMAIN_EXPORT}, ${BUILDDIR}/miq_ae_datastore]"
 
 ----
@@ -197,6 +203,8 @@ BUILDDIR=/tmp/CFME-build
 DOMAIN_IMPORT=YourDomainHere
 
 cd /var/www/miq/vmdb
+bin/rake rhconsulting:miq_schedules:import[${BUILDDIR}/schedules]
+bin/rake rhconsulting:miq_scriptsrc:import[${BUILDDIR}/scriptsrc]
 bin/rake rhconsulting:provision_dialogs:import[${BUILDDIR}/provision_dialogs]
 bin/rake rhconsulting:service_dialogs:import[${BUILDDIR}/service_dialogs]
 bin/rake rhconsulting:roles:import[${BUILDDIR}/roles/roles.yml]
