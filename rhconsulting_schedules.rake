@@ -25,7 +25,10 @@ class MiqSchedulesImportExport
       'DatabaseBackup'    => 'database_operations',
       'EmsCluster'        => 'smartstate',
       'Host'              => 'smartstate',
-      'Vm'                => 'smartstate'
+      'Vm'                => 'smartstate',
+      'MiqReport'         => 'smartstate',
+      'MiqTemplate'       => 'smartstate',
+      'Storage'           => 'smartstate'
     }
   end
 
@@ -72,7 +75,7 @@ private
 
   # get the user in the following order:
   #   user by userid: generally available during export
-  #   default user:   use the admin user in the absence of the user assigned by the export data 
+  #   default user:   use the admin user in the absence of the user assigned by the export data
   def export_user(model_object_attrs)
     User.find_by(:userid => model_object_attrs[:userid]) || User.find_by(:userid => 'admin')
   end
