@@ -64,20 +64,27 @@ class ButtonsImportExport
     end
   end
 
-  def import_resource_actions(custom_button, resource_actions)
-    resource_action = ResourceAction.new
-    all_ra = ResourceAction.in_region(MiqRegion.my_region_number)
-    all_ra.each do |find_action|
-      if find_action['resource_id'] == custom_button.id
-        resource_action = find_action
-        resource_action.reload
-      end
-    end
+  def import_resource_actions(custom_button, resource_actions, cbs)
+    #count = 0
+    #cbs.each do | cb_entry |
+    #   puts "CBS Entry"
+    #   puts cb_entry.class
+    #   puts cb_entry.inspect
+    #
+    #   if cb_entry['name'] == name
+    #      puts "Updating CB Entry"
+    #      cb_entry['resource_actions'] = resource_actions
+    #      cbs[count]=cb_entry
+    #      puts cbs.inspect
+    #      puts cb_entry['resource_actions']
+    #   end
+    #   count += 1
+    #end
+    resource_action = ResourceAction.in_region(MiqRegion.my_region_number).find_or_create_by(
+      resource_id: custom_button.id, resource_type: 'CustomButton')
 
     ra = {}
     ra['action'] = resource_actions['action']
-    ra['resource_id'] = custom_button.id
-    ra['resource_type'] = "CustomButton"
     ra['ae_namespace'] = resource_actions['ae_namespace']
     ra['ae_class'] = resource_actions['ae_class']
     ra['ae_instance'] = resource_actions['ae_instance']
