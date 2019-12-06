@@ -54,7 +54,7 @@ class ServiceDialogImportExport
   def check_field_associations(fields)
     dialog_field_association_validator = DialogFieldAssociationValidator.new
     associations = fields.each_with_object({}) { |df, hsh| hsh.merge!(df["name"] => df["dialog_field_responders"]) if df["dialog_field_responders"].present? }
-    raise DialogFieldAssociationCircularReferenceError if dialog_field_association_validator.circular_references(associations)
+    associations.each_key { |k| dialog_field_association_validator.check_for_circular_references(associations, k) }
   end
 
   def build_associations(dialog, association_list)
