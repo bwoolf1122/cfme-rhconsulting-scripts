@@ -22,9 +22,7 @@ class ServiceCatalogsImportExport
         data = []
         data << c.first[1]['template']
         data.each { |template|
-          ServiceTemplate.transaction do
-            service_templates_imported.concat import_service_templates(template)
-          end
+          service_templates_imported.concat import_service_templates(template)
         }
       }
     end
@@ -100,41 +98,43 @@ private
   def import_service_templates(templates)
     service_templates_imported = []
     templates.sort_by { |t| t['service_type'] == 'composite' ? 1 : 0 }.each do |t|
-      puts "Catalog Item: [#{t['name']}]"
-      template = ServiceTemplate.in_region(MiqRegion.my_region_number).find_or_create_by(name: t['name'])
-      if t['tenant_name'].nil?
-        template.update_attributes!(t.slice(
-        'description', 'type', 'display', 'service_type',
-        'prov_type', 'provision_cost', 'long_description'))
-      else
-        tenant = Tenant.find_by_name(t['tenant_name'])
-        if tenant.nil?
-            puts "ERROR: Unable to locate [#{t['tenant_name']}] tenant in template [#{t['name']}]"
-            exit(1)
+      ServiceTemplate.transaction do
+        puts "Catalog Item: [#{t['name']}]"
+        @template = ServiceTemplate.in_region(MiqRegion.my_region_number).find_or_create_by(name: t['name'])
+        if t['tenant_name'].nil?
+          @template.update_attributes!(t.slice(
+          'description', 'type', 'display', 'service_type',
+          'prov_type', 'provision_cost', 'long_description'))
+        else
+          tenant = Tenant.find_by_name(t['tenant_name'])
+          if tenant.nil?
+              puts "ERROR: Unable to locate [#{t['tenant_name']}] tenant in template [#{t['name']}]"
+              exit(1)
+          end
+          t.delete('tenant_name')
+          t.merge!({ "tenant_id" => tenant.id })
+          @template.update_attributes!(t.slice(
+          'description', 'type', 'display', 'service_type',
+          'prov_type', 'provision_cost', 'long_description', 'tenant_id'))
+          puts "Catalog Item: [#{t['name']} (#{tenant.name})]"
         end
-        t.delete('tenant_name')
-        t.merge!({ "tenant_id" => tenant.id })
-        template.update_attributes!(t.slice(
-        'description', 'type', 'display', 'service_type',
-        'prov_type', 'provision_cost', 'long_description', 'tenant_id'))
-        puts "Catalog Item: [#{t['name']} (#{tenant.name})]"
-      end
-      unless t['service_template_catalog_name'].blank?
-        template.service_template_catalog = ServiceTemplateCatalog.in_region(MiqRegion.my_region_number).find_by_name(
-          t['service_template_catalog_name'])
-        raise "Unable to locate catalog: [#{t['service_template_catalog_name']}]" unless template.service_template_catalog
-      end
-      template.save!
+        unless t['service_template_catalog_name'].blank?
+          @template.service_template_catalog = ServiceTemplateCatalog.in_region(MiqRegion.my_region_number).find_by_name(
+            t['service_template_catalog_name'])
+          raise "Unable to locate catalog: [#{t['service_template_catalog_name']}]" unless @template.service_template_catalog
+        end
+        @template.save!
 
-      import_resource_actions(t['resource_actions'], template)
-      import_service_resources(t['service_resources'] || [], template)
-      import_custom_buttons(t['custom_buttons'], template, template)
-      import_custom_button_sets(t['custom_button_sets'], template)
-      import_job_template(t['job_template'], template)
-	    
-      import_service_template_options(t['options'], template)
-      template.save!
-      service_templates_imported << t['name']
+        import_resource_actions(t['resource_actions'], @template)
+        import_service_resources(t['service_resources'] || [], @template)
+        import_custom_buttons(t['custom_buttons'], @template, @template)
+        import_custom_button_sets(t['custom_button_sets'], @template)
+        import_job_template(t['job_template'], @template)
+        import_service_template_options(t['options'], @template)
+        @template.save!
+        service_templates_imported << t['name']
+      end
+      import_config_info(t['config_info'], @template) if t['prov_type'] == 'vmware'
     end
     service_templates_imported
   end
@@ -226,6 +226,16 @@ private
       job_template = ManageIQ::Providers::AnsibleTower::AutomationManager::ConfigurationScript.find_by_name(job_template_name)
       template.job_template = job_template unless job_template.nil?
     end
+  end
+
+  def import_config_info(config_info, template)
+    ci = config_info.except(:provision, :retirement, :reconfigure)
+    workflow_class = MiqProvisionWorkflow.class_for_source(ci[:src_vm_id])
+    if workflow_class
+      request = workflow_class.new(ci, User.first).make_request(nil, ci)
+      template.add_resource!(request)
+    end
+    # service_template.create_resource_actions(config_info)
   end
 
   def import_resource_actions(resource_actions, template)
@@ -373,6 +383,7 @@ private
       tenant_name = Tenant.find_by_id(attributes['tenant_id']).name
       attributes.delete('tenant_id')
       attributes.merge!({"tenant_name" => tenant_name})
+      attributes['config_info'] = template.config_info if template.prov_type == 'vmware'
       attributes['options'] = export_service_template_options(template.options)
       attributes['service_template_catalog_name'] = template.service_template_catalog.name if template.service_template_catalog
       attributes['resource_actions'] = export_resource_actions(template.resource_actions)
