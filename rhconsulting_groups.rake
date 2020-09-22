@@ -64,7 +64,6 @@ private
         group.miq_user_role = MiqUserRole.find_by(name:miq_user_role_name)
 
         group.save!
-        group.update_attributes!(r)
       end
     rescue
       raise ParsedNonDialogYamlError
