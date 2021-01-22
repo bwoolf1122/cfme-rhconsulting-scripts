@@ -78,6 +78,7 @@ private
     catalogs.each do |c|
       if c['tenant_name'].nil?
         puts "Service Catalog: [#{c['name']}]"
+        c.delete('tenant_name')
       else
         tenant = Tenant.find_by_name(c['tenant_name'])
         if tenant.nil?
